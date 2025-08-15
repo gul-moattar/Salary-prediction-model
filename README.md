@@ -1,4 +1,4 @@
-##Salary Prediction Web App (Machine Learning Powered)
+## Salary Prediction Web App (Machine Learning Powered)
 
 An advanced, user-friendly Streamlit application that estimates salaries based on Education Level, Job Title, and Years of Experience. The predictions are powered by a trained Random Forest Regressor model.
 
