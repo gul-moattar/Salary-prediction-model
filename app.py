@@ -39,11 +39,11 @@ job_mapping = {val: idx for idx, val in enumerate(job_title_options)}
 col1 = st.columns([1])[0]
 with col1:
     st.markdown(
-        "<h1 style='text-align: center;'>Interactive Salary Prediction App</h1>",
+        "<h1 style='text-align: center;'>Salary Prediction Web App</h1>",
         unsafe_allow_html=True
     )
     st.markdown(
-        "<p style='text-align: center;'>Predict your salary using Machine Learning trained on real-world employee data.</p>",
+        "<p style='text-align: center;'>Predict your salary on real-world employee data.</p>",
         unsafe_allow_html=True
     )
 
@@ -162,13 +162,3 @@ with tabs[4]:
     -  Model used: Random Forest Regressor  
     -  Visualization shows salary trend across experience years
     """)
-
-# Footer
-st.markdown("""
-<hr style="border:1px solid #ccc;">
-<p style='text-align:center; font-size: 14px;'>
- Created by <a href='https://github.com/Malik9544' target='_blank'>guL-moattar</a> |
-<a href='https://salarypredictionmodel-8tfx9nxanp55wrqoxgbgm3.streamlit.app/' target='_blank'>Live App</a> |
-<a href='https://github.com/Malik9544/Salary_prediction_Model' target='_blank'>GitHub Repo</a>
-</p>
-""", unsafe_allow_html=True)
