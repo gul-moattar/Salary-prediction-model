@@ -83,7 +83,7 @@ with tabs[0]:
                            data=pd.DataFrame([log_entry]).to_csv(index=False), 
                            file_name="prediction.csv")
 
-        # Salary trend chart
+        # Salary trend chart (filled area)
         st.markdown("###  Predicted Salary Trend")
         x_vals = np.linspace(0, 40, 100)
         y_vals = [model.predict([[x, edu_encoded, job_encoded]])[0] for x in x_vals]
@@ -162,18 +162,24 @@ with tabs[2]:
     )
     st.plotly_chart(fig2, use_container_width=True)
 
-    # 3. Experience vs Salary - Bubble Chart
+    # 3. Experience vs Salary - Bubble Chart (fixed for NaN and non-numeric values)
+    exp_salary_df = df.dropna(subset=["Years of Experience", "Salary"]).copy()
+    exp_salary_df["Salary"] = pd.to_numeric(exp_salary_df["Salary"], errors="coerce")
+    exp_salary_df = exp_salary_df.dropna(subset=["Salary"])
+
+    size_scale = (exp_salary_df["Salary"] / exp_salary_df["Salary"].max() * 30).fillna(5)
+
     fig3 = go.Figure(data=[go.Scatter(
-        x=df["Years of Experience"],
-        y=df["Salary"],
+        x=exp_salary_df["Years of Experience"],
+        y=exp_salary_df["Salary"],
         mode='markers',
         marker=dict(
-            size=df["Salary"] / df["Salary"].max() * 30,  # bubble size relative to salary
-            color=df["Salary"],
+            size=size_scale,
+            color=exp_salary_df["Salary"],
             colorscale='Viridis',
             showscale=True
         ),
-        text=df["Job Title"]
+        text=exp_salary_df["Job Title"]
     )])
     fig3.update_layout(
         title="Experience vs Salary (Bubble Chart)",
