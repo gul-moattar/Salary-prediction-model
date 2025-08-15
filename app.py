@@ -3,7 +3,6 @@ import pickle
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-import os
 import datetime
 import time
 
@@ -84,20 +83,34 @@ with tabs[0]:
                            data=pd.DataFrame([log_entry]).to_csv(index=False), 
                            file_name="prediction.csv")
 
-        # Plotly chart for salary trend
+        # Salary trend chart
         st.markdown("###  Predicted Salary Trend")
         x_vals = np.linspace(0, 40, 100)
         y_vals = [model.predict([[x, edu_encoded, job_encoded]])[0] for x in x_vals]
 
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=x_vals, y=y_vals, mode='lines', name='Trend', line=dict(color='#00BFFF')))
-        fig.add_trace(go.Scatter(x=[experience], y=[predicted_salary], mode='markers',
-                                 name='Your Prediction', marker=dict(size=10, color='red')))
-        fig.update_layout(title=f"Salary Trend for {job_title} with {education}",
-                          xaxis_title='Years of Experience',
-                          yaxis_title='Salary',
-                          template='plotly_white',
-                          height=400)
+        fig.add_trace(go.Scatter(
+            x=x_vals, 
+            y=y_vals, 
+            mode='lines', 
+            name='Trend', 
+            fill='tozeroy', 
+            line=dict(color='#00BFFF')
+        ))
+        fig.add_trace(go.Scatter(
+            x=[experience], 
+            y=[predicted_salary], 
+            mode='markers',
+            name='Your Prediction', 
+            marker=dict(size=10, color='red')
+        ))
+        fig.update_layout(
+            title=f"Salary Trend for {job_title} with {education}",
+            xaxis_title='Years of Experience',
+            yaxis_title='Salary',
+            template='plotly_white',
+            height=400
+        )
         st.plotly_chart(fig, use_container_width=True)
 
 # --- Model Performance Tab ---
@@ -116,28 +129,56 @@ with tabs[1]:
 with tabs[2]:
     st.markdown("##  Salary Visual Insights")
 
-    # Job Title-wise average salary
+    # 1. Job Title-wise average salary - Horizontal Bar Chart
     job_avg = df.groupby("Job Title")["Salary"].mean().sort_values()
-    st.plotly_chart(go.Figure(data=[go.Bar(x=job_avg.index, y=job_avg.values, marker_color='indigo')],
-                              layout=go.Layout(title="Average Salary by Job Title", 
-                                               xaxis_title="Job Title", 
-                                               yaxis_title="Salary")), 
-                    use_container_width=True)
+    fig1 = go.Figure(data=[go.Bar(
+        x=job_avg.values,
+        y=job_avg.index,
+        orientation='h',
+        marker=dict(color=job_avg.values, colorscale='Blues')
+    )])
+    fig1.update_layout(
+        title="Average Salary by Job Title",
+        xaxis_title="Salary",
+        yaxis_title="Job Title",
+        template='plotly_white'
+    )
+    st.plotly_chart(fig1, use_container_width=True)
 
-    # Education level boxplot
+    # 2. Salary by Education Level - Violin Plot
     edu_order = df["Education Level"].unique()
-    box_data = [go.Box(y=df[df["Education Level"] == lvl]["Salary"], name=lvl) for lvl in edu_order]
-    st.plotly_chart(go.Figure(data=box_data, 
-                              layout=go.Layout(title="Salary by Education Level", 
-                                               yaxis_title="Salary")), 
-                    use_container_width=True)
+    fig2 = go.Figure()
+    for lvl in edu_order:
+        fig2.add_trace(go.Violin(
+            y=df[df["Education Level"] == lvl]["Salary"],
+            name=lvl,
+            box_visible=True,
+            meanline_visible=True
+        ))
+    fig2.update_layout(
+        title="Salary Distribution by Education Level (Violin Plot)",
+        yaxis_title="Salary",
+        template='plotly_white'
+    )
+    st.plotly_chart(fig2, use_container_width=True)
 
-    # Experience vs Salary Scatter
-    st.plotly_chart(go.Figure(data=[go.Scatter(x=df["Years of Experience"], 
-                                               y=df["Salary"], 
-                                               mode='markers', 
-                                               marker=dict(color='orange'))],
-                              layout=go.Layout(title="Experience vs Salary", 
-                                               xaxis_title="Years of Experience", 
-                                               yaxis_title="Salary")), 
-                    use_container_width=True)
+    # 3. Experience vs Salary - Bubble Chart
+    fig3 = go.Figure(data=[go.Scatter(
+        x=df["Years of Experience"],
+        y=df["Salary"],
+        mode='markers',
+        marker=dict(
+            size=df["Salary"] / df["Salary"].max() * 30,  # bubble size relative to salary
+            color=df["Salary"],
+            colorscale='Viridis',
+            showscale=True
+        ),
+        text=df["Job Title"]
+    )])
+    fig3.update_layout(
+        title="Experience vs Salary (Bubble Chart)",
+        xaxis_title="Years of Experience",
+        yaxis_title="Salary",
+        template='plotly_white'
+    )
+    st.plotly_chart(fig3, use_container_width=True)
