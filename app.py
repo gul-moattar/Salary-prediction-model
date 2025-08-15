@@ -36,21 +36,19 @@ job_title_options = df["Job Title"].dropna().unique().tolist()
 edu_mapping = {val: idx for idx, val in enumerate(education_options)}
 job_mapping = {val: idx for idx, val in enumerate(job_title_options)}
 
-col1 = st.columns([1])[0]
-with col1:
-    st.markdown(
-        "<h1 style='text-align: center;'>Salary Prediction Web App</h1>",
-        unsafe_allow_html=True
-    )
-    st.markdown(
-        "<p style='text-align: center;'>Predict your salary on real-world employee data.</p>",
-        unsafe_allow_html=True
-    )
-
+# Page header
+st.markdown(
+    "<h1 style='text-align: center;'>Salary Prediction Web App</h1>",
+    unsafe_allow_html=True
+)
+st.markdown(
+    "<p style='text-align: center;'>Predict your salary on real-world employee data.</p>",
+    unsafe_allow_html=True
+)
 st.markdown("---")
 
-# Tabs layout
-tabs = st.tabs([" Predict", " Model Performance", " Logs", " Visualizations", "ℹ About"])
+# Tabs layout (only 3 tabs now)
+tabs = st.tabs([" Predict", " Model Performance", " Visualizations"])
 
 # --- Predict Tab ---
 with tabs[0]:
@@ -74,7 +72,7 @@ with tabs[0]:
         col1.metric(label="Predicted Salary", value=f"${predicted_salary:,.2f}")
         col2.metric(label="Years of Experience", value=f"{experience} years")
 
-        # Save log
+        # Download result
         log_entry = {
             'timestamp': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             'education_level': education,
@@ -82,19 +80,9 @@ with tabs[0]:
             'years_experience': experience,
             'predicted_salary': predicted_salary
         }
-
-        log_file = 'prediction_log.csv'
-        if os.path.exists(log_file):
-            log_df = pd.read_csv(log_file)
-            log_df = pd.concat([log_df, pd.DataFrame([log_entry])], ignore_index=True)
-        else:
-            log_df = pd.DataFrame([log_entry])
-
-        log_df.to_csv(log_file, index=False)
-        st.success(" Prediction logged successfully!")
-
-        # Download result
-        st.download_button("⬇ Download Prediction", data=pd.DataFrame([log_entry]).to_csv(index=False), file_name="prediction.csv")
+        st.download_button("⬇ Download Prediction", 
+                           data=pd.DataFrame([log_entry]).to_csv(index=False), 
+                           file_name="prediction.csv")
 
         # Plotly chart for salary trend
         st.markdown("###  Predicted Salary Trend")
@@ -124,41 +112,32 @@ with tabs[1]:
     | R² Score | 0.9194    |
     """)
 
-# --- Logs Tab ---
-with tabs[2]:
-    st.markdown("##  Prediction Logs")
-    if os.path.exists("prediction_log.csv"):
-        log_data = pd.read_csv("prediction_log.csv")
-        st.dataframe(log_data.tail(20), use_container_width=True)
-        st.download_button("⬇ Download Full Log", data=log_data.to_csv(index=False), file_name="prediction_log.csv", mime="text/csv")
-    else:
-        st.info("No predictions logged yet.")
-
 # --- Visualizations Tab ---
-with tabs[3]:
+with tabs[2]:
     st.markdown("##  Salary Visual Insights")
 
     # Job Title-wise average salary
     job_avg = df.groupby("Job Title")["Salary"].mean().sort_values()
     st.plotly_chart(go.Figure(data=[go.Bar(x=job_avg.index, y=job_avg.values, marker_color='indigo')],
-                              layout=go.Layout(title="Average Salary by Job Title", xaxis_title="Job Title", yaxis_title="Salary")), use_container_width=True)
+                              layout=go.Layout(title="Average Salary by Job Title", 
+                                               xaxis_title="Job Title", 
+                                               yaxis_title="Salary")), 
+                    use_container_width=True)
 
     # Education level boxplot
     edu_order = df["Education Level"].unique()
     box_data = [go.Box(y=df[df["Education Level"] == lvl]["Salary"], name=lvl) for lvl in edu_order]
-    st.plotly_chart(go.Figure(data=box_data, layout=go.Layout(title="Salary by Education Level", yaxis_title="Salary")), use_container_width=True)
+    st.plotly_chart(go.Figure(data=box_data, 
+                              layout=go.Layout(title="Salary by Education Level", 
+                                               yaxis_title="Salary")), 
+                    use_container_width=True)
 
     # Experience vs Salary Scatter
-    st.plotly_chart(go.Figure(data=[go.Scatter(x=df["Years of Experience"], y=df["Salary"], mode='markers', marker=dict(color='orange'))],
-                              layout=go.Layout(title="Experience vs Salary", xaxis_title="Years of Experience", yaxis_title="Salary")), use_container_width=True)
-
-# --- About Tab ---
-with tabs[4]:
-    st.info("""
-    This salary prediction app was built as part of the **2025 Summer Internship at DIGIPEX Solutions LLC**.
-
-    -  Built with Python, Streamlit, and Scikit-learn  
-    -  Predicts salary using Education Level, Job Title, and Years of Experience  
-    -  Model used: Random Forest Regressor  
-    -  Visualization shows salary trend across experience years
-    """)
+    st.plotly_chart(go.Figure(data=[go.Scatter(x=df["Years of Experience"], 
+                                               y=df["Salary"], 
+                                               mode='markers', 
+                                               marker=dict(color='orange'))],
+                              layout=go.Layout(title="Experience vs Salary", 
+                                               xaxis_title="Years of Experience", 
+                                               yaxis_title="Salary")), 
+                    use_container_width=True)
