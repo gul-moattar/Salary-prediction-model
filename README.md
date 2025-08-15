@@ -10,7 +10,7 @@
 
 ##  Live Demo
 
- [Click here to try the live app]())
+ [Click here to try the live app](https://salary-prediction-model-njaxqdgjmcvvcjupq6fmxl.streamlit.app/))
 
 ---
 
